@@ -48,7 +48,7 @@
 
 (defun imc//advice-command-refresh-cursors (cmd)
   "Advice CMD in order to refresh cursors positions."
-  (let ((advice (intern (format "emp/adv-nav-%S" cmd))))
+  (let ((advice (intern (format "imc/adv-nav-%S" cmd))))
     (eval
      `(progn
         (push ',(list cmd advice :around) imc--advices)
@@ -155,8 +155,12 @@ RCOL and RROW are coordinates of the reference point."
       ;; update overlay
       (save-excursion
         (ignore-errors
+          (unless (equal dy 0)
+            (forward-line dy)
+            (advice-remove 'evil-forward-char 'imc/adv-nav-evil-forward-char)
+            (evil-forward-char px nil t)
+            (advice-add 'evil-forward-char :around 'imc/adv-nav-evil-forward-char)))
           (unless (equal dx 0) (forward-char dx))
-          (unless (equal dy 0) (forward-line dy)))
         (move-overlay o (point) (+ (point) imc--overlay-lenght))))))
 
 (defun imc//normalize-cursor-start ()
